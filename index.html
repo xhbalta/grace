@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Balta Media · Conocimiento en acción</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fuentes -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="https://media.baltaanay.org/web/image/885-f3d79ca9/xhbalta-aula.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://media.baltaanay.org/web/image/885-f3d79ca9/xhbalta-aula.png">
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="/styles.css">
+    
+    <!-- ESTILOS BASE - CON CSS GRID PARA LAYOUT PERFECTO -->
+    <style id="sidebar-base-styles">
+        /* Reset */
+        * {
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        
+        body {
+            min-height: 100vh;
+            background: #050505;
+            display: grid;
+            grid-template-columns: auto 1fr; /* Sidebar automática, resto 1fr */
+            grid-template-rows: auto auto 1fr; /* Header, categorías, contenido */
+            grid-template-areas: 
+                "sidebar header"
+                "sidebar categories"
+                "sidebar content";
+        }
+        
+        /* SIDEBAR */
+        .sidebar-desktop {
+            grid-area: sidebar;
+            background: #0F0F0F;
+            color: #fff;
+            z-index: 900;
+            overflow-x: hidden;
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+            scrollbar-width: none;
+            transition: width 0.3s ease;
+            width: 70px; /* Colapsado por defecto */
+            min-width: 70px;
+        }
+        
+        .sidebar-desktop.expanded {
+            width: 15%;
+            min-width: 180px;
+        }
+        
+        .sidebar-desktop::-webkit-scrollbar { display: none; }
+        
+        @media (max-width: 768px) {
+            .sidebar-desktop { display: none !important; }
+        }
+
+        .sidebar-toggle {
+            display: flex;
+            justify-content: flex-end;
+            padding: 16px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+        .sidebar-toggle svg { width: 24px; height: 24px; fill: white; transition: transform 0.2s; }
+        .sidebar-desktop.expanded .sidebar-toggle svg { transform: rotate(180deg); }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 0 8px;
+            margin-bottom: 30px;
+        }
+        .sidebar-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 8px;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+        .sidebar-nav-item:hover { background: rgba(255,255,255,0.1); }
+        .sidebar-nav-item.active { background: rgba(255,255,255,0.2); }
+        .sidebar-nav-item img { width: 24px; height: 24px; filter: brightness(1.2); flex-shrink: 0; }
+        .sidebar-nav-item span { font-size: 14px; font-weight: 500; }
+        .sidebar-desktop.collapsed .sidebar-nav-item span { display: none; }
+
+        .sidebar-desktop.collapsed .sidebar-rec-section { display: none; }
+        .sidebar-rec-section {
+            padding: 0 8px;
+            margin-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 16px;
+        }
+        .sidebar-rec-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .sidebar-rec-header a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .sidebar-rec-header svg { width: 16px; height: 16px; fill: white; }
+        .sidebar-rec-list { display: flex; flex-direction: column; gap: 12px; }
+        .sidebar-rec-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+        }
+        .sidebar-rec-item-info { flex: 1; min-width: 0; }
+        .sidebar-rec-item-title { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sidebar-rec-item-author { font-size: 11px; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sidebar-rec-play-btn {
+            background: none; border: none; color: white; cursor: pointer; padding: 4px 8px; border-radius: 4px;
+            display: flex; align-items: center; justify-content: center; transition: background 0.2s;
+        }
+        .sidebar-rec-play-btn:hover { background: rgba(255,255,255,0.2); }
+        .sidebar-rec-play-btn svg { width: 18px; height: 18px; fill: white; }
+
+        /* HEADER */
+        #main-header {
+            grid-area: header;
+            position: sticky;
+            top: 0;
+            background: rgba(5,5,5,0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            z-index: 50;
+        }
+        
+        #main-header > div {
+            padding: 0.75rem 1rem;
+        }
+
+        /* BARRA DE CATEGORÍAS */
+        #category-filters {
+            grid-area: categories;
+            position: sticky;
+            top: 0;
+            background: rgba(5,5,5,0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            z-index: 40;
+        }
+        
+        #category-filters > div {
+            padding: 0.5rem 1rem;
+        }
+
+        /* CONTENEDOR PRINCIPAL */
+        #content {
+            grid-area: content;
+            padding: 1rem 1rem;
+            min-height: 100vh;
+        }
+
+        /* REPRODUCTOR (si se inserta dentro del contenido, se adaptará automáticamente) */
+        .player-universal {
+            /* Si es fijo y debe estar sobre el contenido, se manejará aparte */
+        }
+
+        /* En móviles, una sola columna */
+        @media (max-width: 768px) {
+            body {
+                grid-template-columns: 1fr;
+                grid-template-areas: 
+                    "header"
+                    "categories"
+                    "content";
+            }
+        }
+    </style>
+</head>
+<body class="bg-[#050505] text-white font-[Plus_Jakarta_Sans]">
+
+<!-- Header principal -->
+<header id="main-header">
+    <div class="flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2" data-link>
+            <img src="https://media.baltaanay.org/web/image/885-f3d79ca9/xhbalta-aula.png" alt="Balta Media" class="w-6 h-6 sm:w-8 sm:h-8 rounded-lg object-cover" loading="lazy">
+            <span class="text-lg sm:text-xl font-bold text-white">Balta Media</span>
+        </a>
+
+        <div class="flex items-center gap-3 sm:gap-4">
+            <a href="/novedades" class="relative text-gray-400 hover:text-white" data-link>
+                <img src="https://media.baltaanay.org/web/image/796-aee658de/Explore.png" alt="Novedades" class="w-5 h-5" loading="lazy">
+                <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            </a>
+            <a href="/my/home" class="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full overflow-hidden" data-link>
+                <img src="https://media.baltaanay.org/web/image/793-902e5b33/Search%20%282%29.png" alt="Usuario" class="w-full h-full object-cover" loading="lazy">
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- Barra de categorías -->
+<div id="category-filters">
+    <div class="overflow-x-auto no-scrollbar">
+        <div class="flex items-center gap-2 sm:gap-3" id="category-pills"></div>
+    </div>
+</div>
+
+<!-- ================================================ -->
+<!-- 🟢 REPRODUCTOR UNIVERSAL - PEGA AQUÍ TU CÓDIGO 🟢 -->
+<!-- ================================================ -->
+
+<!-- ================================================ -->
+
+<!-- Contenedor principal - SIN LÍMITES -->
+<main id="content">
+    <!-- Aquí se inyecta el contenido dinámico -->
+</main>
+
+<!-- Modal de error -->
+<div id="errorModal" class="fixed inset-0 z-[10000] flex items-center justify-center hidden" style="background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);">
+    <div class="bg-[#1e1e2f] rounded-2xl max-w-md w-full p-6 border border-white/10 shadow-2xl">
+        <h3 class="text-xl font-bold text-white mb-3" id="errorModalTitle">Error</h3>
+        <p class="text-gray-300 mb-6" id="errorModalMessage"></p>
+        <div class="flex flex-col sm:flex-row gap-3 justify-end">
+            <a href="https://www.baltaanay.org/contactus" target="_blank" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-sm font-semibold text-center">Reportar problema</a>
+            <a href="https://www.baltaanay.org/solicitar" target="_blank" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white text-sm font-semibold text-center">Solicitar</a>
+            <button id="closeErrorModal" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white text-sm font-semibold">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Botón flotante móvil -->
+<button id="openPlayerBtn" onclick="window.togglePlayer ? window.togglePlayer() : window.updatePlayerVisibility?.(true)" 
+        class="fixed bottom-20 right-4 z-[1002] bg-[#7b2eda] rounded-full p-3 shadow-lg flex items-center gap-2 lg:hidden">
+    <img src="https://nikichitonjes-home.odoo.com/web/image/478-0e3df8d3/reanudar.gif" alt="Reproductor" class="w-6 h-6">
+    <span class="text-sm font-bold">Escuchar</span>
+</button>
+
+<!-- Script de la barra lateral (simplificado, sin ajustes de layout manual) -->
+<script>
+(function() {
+    const SIDEBAR_CONFIG = {
+        BREAKPOINT: 768,
+    };
+
+    let sidebarInstance = {
+        initialized: false,
+        currentState: localStorage.getItem('sidebar_state') || 'collapsed',
+        isMobile: window.innerWidth <= SIDEBAR_CONFIG.BREAKPOINT
+    };
+
+    function getRecommendations() {
+        try { return window.RECOMENDADOS || []; } catch (e) { return []; }
+    }
+
+    function renderSidebar() {
+        const sidebar = document.createElement('aside');
+        sidebar.className = `sidebar-desktop ${sidebarInstance.currentState}`;
+        sidebar.id = 'sidebarDesktop';
+
+        const toggle = document.createElement('div');
+        toggle.className = 'sidebar-toggle';
+        toggle.id = 'sidebarDesktopToggle';
+        toggle.innerHTML = '<svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>';
+
+        const nav = document.createElement('div');
+        nav.className = 'sidebar-nav';
+        nav.innerHTML = `
+            <a href="/" class="sidebar-nav-item" title="Home" data-link>
+                <img src="https://media.baltaanay.org/web/image/798-1b947c8d/Home%20%282%29.webp" alt="Home" loading="lazy"><span>Home</span>
+            </a>
+            <a href="/buscar" class="sidebar-nav-item" title="Explorar" data-link>
+                <img src="https://www.baltaanay.org/web/image/986-2bf9d2bb/Search%20%282%29.webp" alt="Explorar" loading="lazy"><span>Explorar</span>
+            </a>
+            <a href="/subir" class="sidebar-nav-item" title="Cargar" data-link>
+                <img src="https://www.baltaanay.org/web/image/991-1c3c204a/subir.webp" alt="Cargar" loading="lazy"><span>Cargar</span>
+            </a>
+            <a href="https://www.baltaanay.org/solicitud" class="sidebar-nav-item" title="Solicitar">
+                <img src="https://www.baltaanay.org/web/image/922-f3d79ca9/xhbalta-aula.png" alt="Solicitar" loading="lazy"><span>Solicitar</span>
+            </a>
+            <a href="/my/home" class="sidebar-nav-item" title="Usuario" data-link>
+                <img src="https://nikichitonjesus3.odoo.com/web/image/453-f4d8c1eb/user.png" alt="Usuario" loading="lazy"><span>Portal</span>
+            </a>
+        `;
+
+        const recSection = document.createElement('div');
+        recSection.className = 'sidebar-rec-section';
+        recSection.innerHTML = `
+            <div class="sidebar-rec-header">
+                <a href="/novedades" data-link>Recomendados<svg viewBox="0 0 24 24"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg></a>
+            </div>
+            <div class="sidebar-rec-list" id="sidebarRecList"></div>
+        `;
+
+        sidebar.appendChild(toggle);
+        sidebar.appendChild(nav);
+        sidebar.appendChild(recSection);
+        return sidebar;
+    }
+
+    function populateRecommendations() {
+        const container = document.getElementById('sidebarRecList');
+        if (!container) return;
+
+        const episodes = getRecommendations();
+
+        if (!episodes.length) {
+            container.innerHTML = '<div style="color:#aaa; padding:8px;">No hay recomendados</div>';
+            return;
+        }
+
+        container.innerHTML = '';
+        episodes.forEach(ep => {
+            const title = ep.title || 'Sin título';
+            const author = ep.author || (ep.series?.titulo_serie) || 'Desconocido';
+            const item = document.createElement('div');
+            item.className = 'sidebar-rec-item';
+            item.innerHTML = `
+                <div class="sidebar-rec-item-info">
+                    <div class="sidebar-rec-item-title">${title}</div>
+                    <div class="sidebar-rec-item-author">${author}</div>
+                </div>
+                <button class="sidebar-rec-play-btn" data-episode='${JSON.stringify(ep).replace(/'/g, "&#39;")}'>
+                    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+            `;
+            
+            const btn = item.querySelector('.sidebar-rec-play-btn');
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const epData = JSON.parse(btn.dataset.episode);
+                if (typeof window.playEpisodeExpanded === 'function') {
+                    window.playEpisodeExpanded(
+                        epData.mediaUrl || '',
+                        epData.type || 'audio',
+                        epData.coverUrl || '',
+                        epData.series?.portada_serie || epData.coverUrl || '',
+                        epData.title || '',
+                        epData.detailUrl || '',
+                        epData.author || (epData.series?.titulo_serie) || 'Roberto',
+                        epData.next || [],
+                        epData.description || '',
+                        true
+                    );
+                }
+            });
+            container.appendChild(item);
+        });
+    }
+
+    function setActiveNavItem() {
+        const currentPath = window.location.pathname;
+        document.querySelectorAll('.sidebar-nav-item').forEach(item => {
+            const href = item.getAttribute('href');
+            item.classList.toggle('active', 
+                (href === currentPath) || 
+                (href === '/' && currentPath === '/') ||
+                (href === '/buscar' && currentPath === '/buscar')
+            );
+        });
+    }
+
+    function initSidebarToggle() {
+        const sidebar = document.getElementById('sidebarDesktop');
+        const toggle = document.getElementById('sidebarDesktopToggle');
+        if (!sidebar || !toggle) return;
+
+        const newToggle = toggle.cloneNode(true);
+        toggle.parentNode.replaceChild(newToggle, toggle);
+        
+        newToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            if (isCollapsed) {
+                sidebar.classList.remove('collapsed');
+                sidebar.classList.add('expanded');
+            } else {
+                sidebar.classList.add('collapsed');
+                sidebar.classList.remove('expanded');
+            }
+            localStorage.setItem('sidebar_state', isCollapsed ? 'expanded' : 'collapsed');
+        });
+    }
+
+    function initSidebar() {
+        sidebarInstance.isMobile = window.innerWidth <= SIDEBAR_CONFIG.BREAKPOINT;
+        
+        const oldSidebar = document.querySelector('.sidebar-desktop');
+        if (oldSidebar) oldSidebar.remove();
+        
+        if (sidebarInstance.isMobile) {
+            return; // No sidebar en móvil
+        }
+        
+        const sidebar = renderSidebar();
+        document.body.insertBefore(sidebar, document.body.firstChild);
+        
+        populateRecommendations();
+        initSidebarToggle();
+        setActiveNavItem();
+        
+        sidebarInstance.initialized = true;
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSidebar);
+    } else {
+        initSidebar();
+    }
+
+    window.addEventListener('resize', () => {
+        const wasMobile = sidebarInstance.isMobile;
+        const isMobileNow = window.innerWidth <= SIDEBAR_CONFIG.BREAKPOINT;
+        
+        if (wasMobile !== isMobileNow) {
+            sidebarInstance.isMobile = isMobileNow;
+            initSidebar();
+        }
+    });
+
+    document.addEventListener('spa-navigation', setActiveNavItem);
+    window.addEventListener('popstate', setActiveNavItem);
+
+    window.sidebarAPI = {
+        refresh: populateRecommendations,
+        setActive: setActiveNavItem,
+        toggle: () => {
+            const sidebar = document.getElementById('sidebarDesktop');
+            if (sidebar) {
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                if (isCollapsed) {
+                    sidebar.classList.remove('collapsed');
+                    sidebar.classList.add('expanded');
+                } else {
+                    sidebar.classList.add('collapsed');
+                    sidebar.classList.remove('expanded');
+                }
+                localStorage.setItem('sidebar_state', isCollapsed ? 'expanded' : 'collapsed');
+            }
+        }
+    };
+})();
+</script>
+
+<script type="module" src="/main.js"></script>
+</body>
+</html>
